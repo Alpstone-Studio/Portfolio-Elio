@@ -1,0 +1,13 @@
+{
+  "videos": [
+    {
+      "id": "demo-video-1",
+      "youtubeId": "dQw4w9WgXcQ",
+      "title": "Exemple de vidéo",
+      "description": "Ceci est une vidéo de démonstration. Vous pouvez la supprimer depuis le panel admin.",
+      "order": 1,
+      "visible": true,
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ]
+}

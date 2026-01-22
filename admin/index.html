@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Portfolio YouTube</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Page de connexion -->
+    <div id="login-page" class="page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>Panel Admin</h1>
+                    <p>Connectez-vous pour gerer votre portfolio</p>
+                </div>
+
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="username">Nom d'utilisateur</label>
+                        <input type="text" id="username" name="username" required autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+
+                    <div id="login-error" class="error-message hidden"></div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span>Se connecter</span>
+                    </button>
+                </form>
+
+                <a href="/" class="back-link">Retour au portfolio</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard admin -->
+    <div id="dashboard-page" class="page hidden">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="header-content">
+                <h1>Dashboard Admin</h1>
+                <div class="header-actions">
+                    <a href="/" class="btn btn-secondary">Voir le site</a>
+                    <button id="logout-btn" class="btn btn-danger">Deconnexion</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Contenu principal -->
+        <main class="admin-main">
+            <!-- Section ajout de video -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Ajouter une video</h2>
+                </div>
+
+                <form id="add-video-form" class="add-video-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="video-url">URL YouTube</label>
+                            <input type="text" id="video-url" placeholder="https://www.youtube.com/watch?v=..." required>
+                            <small class="form-help">Collez l'URL complete de la video YouTube</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="video-title">Titre</label>
+                            <input type="text" id="video-title" placeholder="Titre de la video" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="video-description">Description (optionnelle)</label>
+                        <textarea id="video-description" placeholder="Description de la video..." rows="2"></textarea>
+                    </div>
+
+                    <div id="add-video-error" class="error-message hidden"></div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Ajouter la video
+                    </button>
+                </form>
+            </section>
+
+            <!-- Section liste des videos -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Mes videos</h2>
+                    <span id="video-count" class="video-count">0 videos</span>
+                </div>
+
+                <div id="videos-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Chargement...</p>
+                </div>
+
+                <div id="videos-empty" class="empty-state hidden">
+                    <p>Aucune video pour le moment. Ajoutez votre premiere video ci-dessus.</p>
+                </div>
+
+                <div id="videos-list" class="videos-list hidden"></div>
+            </section>
+
+            <!-- Section paramètres -->
+            <section class="section">
+                <div class="section-header">
+                    <h2>Paramètres</h2>
+                </div>
+
+                <!-- Changer le mot de passe -->
+                <div class="settings-subsection">
+                    <h3>Changer le mot de passe</h3>
+                    <form id="change-password-form" class="settings-form">
+                        <div class="form-group">
+                            <label for="current-password">Mot de passe actuel</label>
+                            <input type="password" id="current-password" name="currentPassword" required autocomplete="current-password">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-password">Nouveau mot de passe</label>
+                            <input type="password" id="new-password" name="newPassword" required autocomplete="new-password" minlength="6">
+                            <small class="form-help">Minimum 6 caractères</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirm-password">Confirmer le nouveau mot de passe</label>
+                            <input type="password" id="confirm-password" name="confirmPassword" required autocomplete="new-password" minlength="6">
+                        </div>
+
+                        <div id="change-password-error" class="error-message hidden"></div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Changer le mot de passe
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Gestion des utilisateurs -->
+                <div class="settings-subsection">
+                    <h3>Comptes administrateurs</h3>
+
+                    <button id="show-create-user-btn" class="btn btn-success mb-3">
+                        + Créer un nouvel administrateur
+                    </button>
+
+                    <!-- Formulaire de création (caché par défaut) -->
+                    <div id="create-user-form-container" class="hidden">
+                        <form id="create-user-form" class="settings-form mb-3">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="new-username">Nom d'utilisateur</label>
+                                    <input type="text" id="new-username" name="username" required autocomplete="off">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="new-user-password">Mot de passe</label>
+                                    <input type="password" id="new-user-password" name="password" required autocomplete="new-password" minlength="6">
+                                    <small class="form-help">Minimum 6 caractères</small>
+                                </div>
+                            </div>
+
+                            <div id="create-user-error" class="error-message hidden"></div>
+
+                            <div class="form-actions">
+                                <button type="button" id="cancel-create-user-btn" class="btn btn-secondary">
+                                    Annuler
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    Créer le compte
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Liste des utilisateurs -->
+                    <div id="users-loading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Chargement...</p>
+                    </div>
+
+                    <div id="users-list" class="users-list"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal d'edition -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Modifier la video</h3>
+                <button class="modal-close" data-close-modal>&times;</button>
+            </div>
+
+            <form id="edit-video-form" class="modal-body">
+                <input type="hidden" id="edit-video-id">
+
+                <div class="form-group">
+                    <label for="edit-youtube-id">ID YouTube</label>
+                    <input type="text" id="edit-youtube-id" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-title">Titre</label>
+                    <input type="text" id="edit-title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-description">Description</label>
+                    <textarea id="edit-description" rows="3"></textarea>
+                </div>
+
+                <div id="edit-video-error" class="error-message hidden"></div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div id="delete-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Confirmer la suppression</h3>
+                <button class="modal-close" data-close-modal>&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <p>Etes-vous sur de vouloir supprimer cette video ?</p>
+                <p class="text-muted">Cette action est irreversible.</p>
+
+                <input type="hidden" id="delete-video-id">
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+                    <button type="button" id="confirm-delete-btn" class="btn btn-danger">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression d'utilisateur -->
+    <div id="delete-user-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Confirmer la suppression</h3>
+                <button class="modal-close" data-close-modal>&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <p>Etes-vous sur de vouloir supprimer cet utilisateur ?</p>
+                <p class="text-muted" id="delete-user-name"></p>
+                <p class="text-muted">Cette action est irreversible.</p>
+
+                <input type="hidden" id="delete-user-id">
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close-modal>Annuler</button>
+                    <button type="button" id="confirm-delete-user-btn" class="btn btn-danger">Supprimer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Script principal -->
+    <script src="js/admin.js"></script>
+</body>
+</html>
