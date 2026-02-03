@@ -1,0 +1,143 @@
+:root {
+  color-scheme: only light;
+  --blue: #006aff;
+  --white: #ffffff;
+  --dark: #171717;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Space Grotesk", sans-serif;
+  background: var(--dark);
+  color: var(--white);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.museum {
+  display: flex;
+  flex-direction: column;
+}
+
+.scene {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8vw;
+  position: relative;
+  opacity: 0;
+  transform: translateY(12vh);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scene.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scene-hero {
+  text-align: center;
+  background: linear-gradient(180deg, rgba(0, 106, 255, 0.2), transparent 70%);
+}
+
+.scene-hero .hero-text {
+  transform: translateY(0);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.scene-hero.is-hidden .hero-text {
+  opacity: 0;
+  transform: translateY(-10vh);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1.5rem;
+}
+
+h1 {
+  font-size: clamp(3rem, 8vw, 6rem);
+  letter-spacing: 0.08em;
+  color: var(--white);
+}
+
+.role {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 300;
+  color: var(--blue);
+  margin-top: 0.6rem;
+}
+
+.section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-title h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.index {
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.body-copy {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  max-width: 640px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.8rem;
+  border-radius: 18px;
+  background: rgba(23, 23, 23, 0.7);
+  backdrop-filter: blur(6px);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+.card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+  color: var(--blue);
+}
+
+.card p {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.card:hover {
+  border-color: var(--blue);
+  transform: translateY(-4px);
+}
+
+@media (max-width: 720px) {
+  .scene {
+    padding: 0 6vw;
+    align-items: flex-start;
+    padding-top: 20vh;
+  }
+
+  .scene-hero {
+    justify-content: center;
+  }
+}
