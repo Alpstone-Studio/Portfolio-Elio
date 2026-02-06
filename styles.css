@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "Monoblock";
+  src: url("Monoblock-VF.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 :root {
   color-scheme: only light;
   --blue: #006aff;
@@ -17,7 +24,7 @@ html {
 }
 
 body {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "Monoblock", "Space Grotesk", system-ui, sans-serif;
   background: var(--dark);
   color: var(--white);
   line-height: 1.5;
