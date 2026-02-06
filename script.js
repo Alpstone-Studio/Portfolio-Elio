@@ -26,6 +26,10 @@ let navIsAnimating = false;
 let navFallbackTimer = null;
 let navShiftRetries = 0;
 let navRecenterTimers = [];
+let navClickLock = false;
+let navClickLockTimer = null;
+let navScrollEndTimer = null;
+let navNeedsRefresh = false;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const lerp = (start, end, amount) => start + (end - start) * amount;
@@ -88,19 +92,20 @@ const updateNavShift = () => {
   if (!navPill || !navStack) {
     return;
   }
+  const links = Array.from(navStack.querySelectorAll(".nav-link"));
   const active = navStack.querySelector(".nav-link.is-active");
-  if (!active) {
+  if (!active || !links.length) {
     return;
   }
-  const pillHeight = navPill.clientHeight;
-  const activeHeight = active.offsetHeight;
-  if ((pillHeight === 0 || activeHeight === 0) && navShiftRetries < 6) {
-    navShiftRetries += 1;
-    window.requestAnimationFrame(updateNavShift);
+  const activeIndex = links.indexOf(active);
+  if (activeIndex < 0) {
     return;
   }
-  navShiftRetries = 0;
-  const activeCenter = active.offsetTop + activeHeight / 2;
+  const linkHeight = 34;
+  const gap = parseFloat(getComputedStyle(navStack).rowGap) || parseFloat(getComputedStyle(navStack).gap) || 0;
+  const pillHeight = navPill.clientHeight || 54;
+  const activeTop = activeIndex * (linkHeight + gap);
+  const activeCenter = activeTop + linkHeight / 2;
   const targetCenter = pillHeight / 2;
   const shift = activeCenter - targetCenter;
   navStack.style.setProperty("--nav-shift", `${shift.toFixed(2)}px`);
@@ -172,10 +177,12 @@ if (navLinks.length) {
       });
 
       if (bestEntry) {
-        const link = navLinkMap.get(bestEntry.target.id);
-        if (link) {
-          navLinks.forEach((item) => item.classList.remove("is-active"));
-          link.classList.add("is-active");
+        if (!navClickLock) {
+          const link = navLinkMap.get(bestEntry.target.id);
+          if (link) {
+            navLinks.forEach((item) => item.classList.remove("is-active"));
+            link.classList.add("is-active");
+          }
         }
 
         if (pageNav) {
@@ -211,10 +218,28 @@ if (pageNav) {
   pageNav.addEventListener("mouseleave", () => requestNavExpanded(false));
 }
 
-const updateNavStateFallback = () => {
+navLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    navClickLock = true;
+    navNeedsRefresh = true;
+    window.clearTimeout(navScrollEndTimer);
+    window.clearTimeout(navClickLockTimer);
+    navClickLockTimer = window.setTimeout(() => {
+      navClickLock = false;
+    }, 1400);
+    navLinks.forEach((item) => item.classList.remove("is-active"));
+    link.classList.add("is-active");
+    updateNavShift();
+    scheduleNavRefresh();
+    scheduleNavRecenter(true);
+  });
+});
+
+const updateNavStateFallback = (options = {}) => {
   if (!pageNav || !navLinks.length || !scenes.length) {
     return;
   }
+  const { forceActive = false } = options;
 
   const viewHeight = window.innerHeight || 1;
   let bestScene = null;
@@ -234,10 +259,12 @@ const updateNavStateFallback = () => {
     return;
   }
 
-  const link = navLinkMap.get(bestScene.id);
-  if (link) {
-    navLinks.forEach((item) => item.classList.remove("is-active"));
-    link.classList.add("is-active");
+  if (forceActive || !navClickLock) {
+    const link = navLinkMap.get(bestScene.id);
+    if (link) {
+      navLinks.forEach((item) => item.classList.remove("is-active"));
+      link.classList.add("is-active");
+    }
   }
 
   const isHero = bestScene.id === "hero";
@@ -255,6 +282,29 @@ const updateNavStateFallback = () => {
   }
 
   window.requestAnimationFrame(updateNavShift);
+};
+
+const forceNavRefresh = () => {
+  if (!pageNav) {
+    return;
+  }
+  navNeedsRefresh = false;
+  navClickLock = false;
+  window.clearTimeout(navScrollEndTimer);
+  navScrollEndTimer = null;
+  window.clearTimeout(navClickLockTimer);
+  navClickLockTimer = null;
+  updateNavStateFallback();
+  updateNavShift();
+};
+
+const scheduleNavRefresh = () => {
+  window.clearTimeout(navScrollEndTimer);
+  navScrollEndTimer = window.setTimeout(() => {
+    if (navNeedsRefresh) {
+      forceNavRefresh();
+    }
+  }, 140);
 };
 
 
@@ -416,13 +466,26 @@ const requestUpdate = () => {
   });
 };
 
-window.addEventListener("scroll", requestUpdate, { passive: true });
+const handleScroll = () => {
+  requestUpdate();
+  if (navNeedsRefresh) {
+    scheduleNavRefresh();
+  }
+};
+
+window.addEventListener("scroll", handleScroll, { passive: true });
+window.addEventListener("scrollend", () => {
+  if (navNeedsRefresh) {
+    forceNavRefresh();
+  }
+});
 window.addEventListener("resize", requestUpdate);
-const scheduleNavRecenter = () => {
+const navRecenterDelays = [0, 120, 260, 480, 760, 1100, 1500, 2100];
+const scheduleNavRecenter = (forceActive = false) => {
   navRecenterTimers.forEach((timer) => window.clearTimeout(timer));
-  navRecenterTimers = [0, 80, 200, 420].map((delay) =>
+  navRecenterTimers = navRecenterDelays.map((delay) =>
     window.setTimeout(() => {
-      updateNavStateFallback();
+      updateNavStateFallback({ forceActive });
       updateNavShift();
     }, delay)
   );
